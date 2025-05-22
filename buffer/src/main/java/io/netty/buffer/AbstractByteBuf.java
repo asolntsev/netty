@@ -38,6 +38,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 
+import static io.netty.buffer.ByteBufUtil.writeUtf8;
 import static io.netty.util.internal.MathUtil.isOutOfBounds;
 import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
@@ -704,7 +705,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
             } else {
                 checkIndex(index, length);
             }
-            return ByteBufUtil.writeUtf8(this, index, length, sequence, sequence.length());
+            return writeUtf8(this, index, length, sequence, sequence.length());
         }
         if (charset.equals(CharsetUtil.US_ASCII) || charset.equals(CharsetUtil.ISO_8859_1)) {
             int length = sequence.length();
@@ -1462,5 +1463,13 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     final void discardMarks() {
         markedReaderIndex = markedWriterIndex = 0;
+    }
+
+    @Override
+    int reserveAndWriteUtf8Seq(CharSequence seq, int start, int end, int reserveBytes) {
+        ensureWritable0(reserveBytes);
+        int written = writeUtf8(this, writerIndex, reserveBytes, seq, start, end);
+        writerIndex += written;
+        return written;
     }
 }

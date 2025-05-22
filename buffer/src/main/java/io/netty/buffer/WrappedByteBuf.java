@@ -97,6 +97,11 @@ public class WrappedByteBuf extends ByteBuf {
     }
 
     @Override
+    int reserveAndWriteUtf8Seq(CharSequence seq, int start, int end, int reserveBytes) {
+        return unwrap().reserveAndWriteUtf8Seq(seq, start, end, reserveBytes);
+    }
+
+    @Override
     public ByteBuf asReadOnly() {
         return buf.asReadOnly();
     }

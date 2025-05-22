@@ -1281,4 +1281,9 @@ class WrappedCompositeByteBuf extends CompositeByteBuf {
     public final ByteBuf unwrap() {
         return wrapped;
     }
+
+    @Override
+    int reserveAndWriteUtf8Seq(CharSequence seq, int start, int end, int reserveBytes) {
+        return unwrap().reserveAndWriteUtf8Seq(seq, start, end, reserveBytes);
+    }
 }

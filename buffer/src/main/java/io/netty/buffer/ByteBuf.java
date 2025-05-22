@@ -29,6 +29,8 @@ import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 
+import static io.netty.util.CharsetUtil.UTF_8;
+
 /**
  * A random and sequential accessible sequence of zero or more bytes (octets).
  * This interface provides an abstract view for one or more primitive byte
@@ -2047,6 +2049,12 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf>, 
      * @param length the number of <tt>NUL</tt>s to write to the buffer
      */
     public abstract ByteBuf writeZero(int length);
+
+    int reserveAndWriteUtf8Seq(CharSequence seq, int start, int end, int reserveBytes) {
+        byte[] bytes = seq.subSequence(start, end).toString().getBytes(UTF_8);
+        writeBytes(bytes);
+        return bytes.length;
+    }
 
     /**
      * Writes the specified {@link CharSequence} at the current {@code writerIndex} and increases

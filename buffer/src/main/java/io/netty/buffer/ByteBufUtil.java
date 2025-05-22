@@ -843,7 +843,7 @@ public final class ByteBufUtil {
      */
     public static int writeUtf8(ByteBuf buf, CharSequence seq) {
         int seqLength = seq.length();
-        return reserveAndWriteUtf8Seq(buf, seq, 0, seqLength, utf8MaxBytes(seqLength));
+        return buf.reserveAndWriteUtf8Seq(seq, 0, seqLength, utf8MaxBytes(seqLength));
     }
 
     /**
@@ -852,7 +852,7 @@ public final class ByteBufUtil {
      */
     public static int writeUtf8(ByteBuf buf, CharSequence seq, int start, int end) {
         checkCharSequenceBounds(seq, start, end);
-        return reserveAndWriteUtf8Seq(buf, seq, start, end, utf8MaxBytes(end - start));
+        return buf.reserveAndWriteUtf8Seq(seq, start, end, utf8MaxBytes(end - start));
     }
 
     /**
@@ -865,7 +865,7 @@ public final class ByteBufUtil {
      * This method returns the actual number of bytes written.
      */
     public static int reserveAndWriteUtf8(ByteBuf buf, CharSequence seq, int reserveBytes) {
-        return reserveAndWriteUtf8Seq(buf, seq, 0, seq.length(), reserveBytes);
+        return buf.reserveAndWriteUtf8Seq(seq, 0, seq.length(), reserveBytes);
     }
 
     /**
@@ -876,29 +876,7 @@ public final class ByteBufUtil {
      * @return actual number of bytes written
      */
     public static int reserveAndWriteUtf8(ByteBuf buf, CharSequence seq, int start, int end, int reserveBytes) {
-        return reserveAndWriteUtf8Seq(buf, checkCharSequenceBounds(seq, start, end), start, end, reserveBytes);
-    }
-
-    private static int reserveAndWriteUtf8Seq(ByteBuf buf, CharSequence seq, int start, int end, int reserveBytes) {
-        for (;;) {
-            if (buf instanceof WrappedCompositeByteBuf) {
-                // WrappedCompositeByteBuf is a sub-class of AbstractByteBuf so it needs special handling.
-                buf = buf.unwrap();
-            } else if (buf instanceof AbstractByteBuf) {
-                AbstractByteBuf byteBuf = (AbstractByteBuf) buf;
-                byteBuf.ensureWritable0(reserveBytes);
-                int written = writeUtf8(byteBuf, byteBuf.writerIndex, reserveBytes, seq, start, end);
-                byteBuf.writerIndex += written;
-                return written;
-            } else if (buf instanceof WrappedByteBuf) {
-                // Unwrap as the wrapped buffer may be an AbstractByteBuf and so we can use fast-path.
-                buf = buf.unwrap();
-            } else {
-                byte[] bytes = seq.subSequence(start, end).toString().getBytes(CharsetUtil.UTF_8);
-                buf.writeBytes(bytes);
-                return bytes.length;
-            }
-        }
+        return buf.reserveAndWriteUtf8Seq(checkCharSequenceBounds(seq, start, end), start, end, reserveBytes);
     }
 
     static int writeUtf8(AbstractByteBuf buffer, int writerIndex, int reservedBytes, CharSequence seq, int len) {
